@@ -1,0 +1,10 @@
+.idea/
+.vscode/
+*.py[co]
+*.log
+*.sqlite3
+media/
+__pycache__/
+.coverage
+htmlcov/
+secrets.json
