@@ -4,6 +4,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from api_tareas.tasks.models import Task
+
 
 class TaskListCreateAPIViewTest(APITestCase):
 
@@ -60,5 +62,69 @@ class TaskListCreateAPIViewTest(APITestCase):
 		self.data['name'] = "Nueva tarea"
 
 		response = self.client.post(self.url, self.data)
+
+		self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+
+
+class TaskMarkAsDoneViewSetTest(APITestCase):
+
+	def setUp(self):
+
+		self.user = User.objects.create_user(
+			username='engel',
+			password='engel.engel'
+		)
+
+		self.client.login(
+			username='engel',
+			password='engel.engel'
+		)
+
+		self.task = Task.objects.create(
+			name="Nueva tarea",
+			owner=self.user
+		)
+
+	def test_puedo_marcar_como_terminada_una_tarea(self):
+
+		url = reverse('tasks:mark_as_done', args=[self.task.id])
+
+		response = self.client.patch(url)
+
+		self.assertEqual(status.HTTP_200_OK, response.status_code)
+
+	def test_debo_estar_logueado_para_marcar_como_terminada_una_tarea(self):
+
+		self.client.logout()
+
+		url = reverse('tasks:mark_as_done', args=[self.task.id])
+
+		response = self.client.patch(url)
+
+		self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+
+	def test_no_puedo_marcar_una_tarea_que_no_existe_como_terminada(self):
+
+		url = reverse('tasks:mark_as_done', args=[3])
+
+		response = self.client.patch(url)
+
+		self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
+
+	def test_solo_puedo_marcar_mis_tareas_como_terminadas(self):
+
+		user2 = User.objects.create_user(
+			username='angel',
+			password='angel.angel'
+		)
+
+		task = Task.objects.create(
+			name="Nueva tarea",
+			owner=user2
+		)
+
+		url = reverse('tasks:mark_as_done', args=[task.id])
+
+		response = self.client.patch(url)
 
 		self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)

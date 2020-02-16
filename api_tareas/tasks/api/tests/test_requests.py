@@ -10,3 +10,9 @@ class TaskRequestTest(SimpleTestCase):
 		url = '/api/v1/tasks/'
 
 		self.assertEqual(views.TaskListCreateAPIView, resolve(url).func.view_class)
+
+	def test_patch_mark_as_done(self):
+
+		url = '/api/v1/tasks/1/done'
+
+		self.assertEqual(views.mark_as_done, resolve(url).func)
