@@ -65,6 +65,22 @@ class TaskListCreateAPIViewTest(APITestCase):
 
 		self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
 
+	def test_el_usuario_logueado_no_tiene_tareas_creadas(self):
+
+		response = self.client.get(self.url)
+
+		self.assertEqual(0, response.data['count'])
+
+	def test_si_el_usuario_logueado_crea_una_tarea_tendra_una(self):
+
+		self.data['name'] = "Mi tarea"
+
+		self.client.post(self.url, self.data)
+
+		response = self.client.get(self.url)
+
+		self.assertEqual(1, response.data['count'])
+
 
 class TaskMarkAsDoneViewSetTest(APITestCase):
 

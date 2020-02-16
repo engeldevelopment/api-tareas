@@ -13,8 +13,10 @@ from ..models import Task
 
 class TaskListCreateAPIView(generics.ListCreateAPIView):
 	serializer_class = TaskSerializer
-	queryset = Task.objects.all()
 	permission_classes = (IsAuthenticated, )
+
+	def get_queryset(self):
+		return Task.objects.filter(owner=self.request.user)
 
 	def perform_create(self, serializer):
 		serializer.save(owner=self.request.user)
