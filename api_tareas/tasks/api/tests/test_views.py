@@ -144,3 +144,79 @@ class TaskMarkAsDoneViewSetTest(APITestCase):
 		response = self.client.patch(url)
 
 		self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+
+
+class TaskRetrieveDestroyAPIViewTest(APITestCase):
+
+	def setUp(self):
+		self.user = User.objects.create_user(
+			username='engel',
+			password='engel.engel'
+		)
+
+		self.otro_usuario = User.objects.create_user(
+			username='otro',
+			password='otro.otro'
+		)
+
+		self.client.login(
+			username='engel',
+			password='engel.engel'
+		)
+
+		self.task = Task.objects.create(
+			name="Nueva tarea",
+			owner=self.user
+		)
+
+		self.task_ajena = Task.objects.create(
+			name="Tarea de otro usuario",
+			owner=self.otro_usuario
+		)
+
+		self.URL = 'tasks:detail_and_destroy'
+		self.url = reverse(self.URL, args=[self.task.id])
+
+	def test_solo_puedo_ver_mis_tareas(self):
+
+		response = self.client.get(self.url)
+
+		self.assertEqual(status.HTTP_200_OK, response.status_code)
+
+	def test_no_puedo_ver_las_tareas_de_otros_usuarios(self):
+
+		url = reverse(self.URL, args=[self.task_ajena.id])
+
+		response = self.client.get(url)
+
+		self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+
+	def test_debo_estar_logueado_para_ver_el_detalle_de_mi_tarea(self):
+
+		self.client.logout()
+
+		response = self.client.get(self.url)
+
+		self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+
+	def test_puedo_eliminar_mis_tareas(self):
+
+		response = self.client.delete(self.url)
+
+		self.assertEqual(status.HTTP_204_NO_CONTENT, response.status_code)
+
+	def test_no_puedo_eliminar_las_tareas_de_otros_usuarios(self):
+
+		url = reverse(self.URL, args=[self.task_ajena.id])
+
+		response = self.client.delete(url)
+
+		self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+
+	def test_no_puedo_eliminar_mis_tareas_si_no_estoy_logueado(self):
+
+		self.client.logout()
+
+		response = self.client.delete(self.url)
+
+		self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)

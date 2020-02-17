@@ -7,6 +7,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from .permissions import IsOwnerOrDeny
 from .serializers import TaskSerializer
 from ..models import Task
 
@@ -20,6 +21,12 @@ class TaskListCreateAPIView(generics.ListCreateAPIView):
 
 	def perform_create(self, serializer):
 		serializer.save(owner=self.request.user)
+
+
+class TaskRetrieveDestroyAPIView(generics.RetrieveDestroyAPIView):
+	serializer_class = TaskSerializer
+	queryset = Task.objects.all()
+	permission_classes = (IsAuthenticated, IsOwnerOrDeny,)
 
 
 class TaskMarkAsDoneViewSet(viewsets.ViewSet):

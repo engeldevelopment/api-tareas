@@ -6,7 +6,7 @@ from ..models import Task
 class TaskSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Task
-		fields = ('name', 'is_done')
+		fields = ('id', 'name', 'is_done')
 
 	def validate_name(self, name):
 
