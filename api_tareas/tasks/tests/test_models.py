@@ -30,3 +30,11 @@ class TaskTest(TestCase):
 		self.task.mark_as_done()
 
 		self.assertTrue(self.task.is_done)
+
+	def test_tareas_pendientes_del_usuario(self):
+
+		self.assertEqual(1, self.user.tasks.undones().count())
+
+	def test_tareas_terminadas_del_usuario(self):
+
+		self.assertEqual(0, self.user.tasks.dones().count())
