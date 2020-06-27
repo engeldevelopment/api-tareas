@@ -9,8 +9,9 @@ https://docs.djangoproject.com/en/2.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
-import json
+import os
 from os.path import abspath, dirname, join
+
 from django.core.exceptions import ImproperlyConfigured
 
 
@@ -23,17 +24,8 @@ def root(*dirs):
 
 # SECURITY WARNING: keep the secret key used in production secret!
 
-
-with open('secrets.json') as f:
-    secrets = json.loads(f.read())
-
-
-def get_env_variable(key, secrets=secrets):
-    try:
-        return secrets[key]
-    except KeyError:
-        msj = "No se encuentra esta variable {0}".format(key)
-        raise ImproperlyConfigured(msj)
+def get_env_variable(key):
+    return os.environ.get(key, "default")
 
 
 SECRET_KEY = get_env_variable('SECRET_KEY')
