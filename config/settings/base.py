@@ -43,6 +43,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+CORS_ORIGIN_WHITELIST = ()
+
 
 # Application definition
 
@@ -57,7 +59,9 @@ INSTALLED_APPS = [
 ]
 
 APP_DE_TERCEROS = [
-    'rest_framework'
+    'rest_framework',
+    'corsheaders',
+    'rest_framework_swagger',
 ]
 
 INSTALLED_APPS += APP_DE_TERCEROS
@@ -65,6 +69,7 @@ INSTALLED_APPS += APP_DE_TERCEROS
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
