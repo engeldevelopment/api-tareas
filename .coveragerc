@@ -1,0 +1,12 @@
+[run]
+source = api_tareas
+
+[report]
+ignore_errors = True
+omit = 
+	*/tests/*
+	*/__init__.py
+	*/admin.py
+	*/apps.py
+	*/migrations/
+	*/__pycache__/

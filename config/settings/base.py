@@ -52,8 +52,8 @@ INSTALLED_APPS = [
 
 APP_DE_TERCEROS = [
     'rest_framework',
-    'corsheaders',
     'rest_framework_swagger',
+    'corsheaders',
 ]
 
 INSTALLED_APPS += APP_DE_TERCEROS

@@ -1,0 +1,22 @@
+name: Integración Continua
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  unittest:
+    name: Ejecución de Pruebas
+    runs-on: ubuntu-18.04
+    steps:
+      env:
+        DJANGO_SETTINGS_MODULE: config.settings.ci
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Instalando dependencias
+        run: pip install -r requirements/ci.txt
+      - name: Corriento pruebas
+        run: make test
