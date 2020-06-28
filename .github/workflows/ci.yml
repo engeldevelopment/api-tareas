@@ -8,9 +8,9 @@ jobs:
   unittest:
     name: Ejecución de Pruebas
     runs-on: ubuntu-18.04
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.ci
     steps:
-      env:
-        DJANGO_SETTINGS_MODULE: config.settings.ci
       - uses: actions/checkout@v2
       - name: Setup Python
         uses: actions/setup-python@v2
