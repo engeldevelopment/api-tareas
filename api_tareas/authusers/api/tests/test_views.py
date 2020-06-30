@@ -1,8 +1,9 @@
 from django.contrib.auth.models import User
-from django.urls import reverse
 
 from rest_framework import status
 from rest_framework.test import APITestCase
+
+from ..end_points import AUTHUSERS_OBTAIN_TOKEN
 
 
 class AuthWithTokenAPIViewTest(APITestCase):
@@ -12,7 +13,7 @@ class AuthWithTokenAPIViewTest(APITestCase):
 			username="engel",
 			password='1234.1234'
 		)
-		self.url = reverse('authusers:obtain_token')
+		self.url = AUTHUSERS_OBTAIN_TOKEN
 
 	def test_return_a_token_gived_a_username_and_password(self):
 

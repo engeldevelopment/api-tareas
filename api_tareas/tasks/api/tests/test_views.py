@@ -1,38 +1,19 @@
-from django.contrib.auth.models import User
 from django.urls import reverse
 
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from api_tareas.tasks.models import Task
+from api_tareas.authusers.api.tests.helpers import create_user_with_credentials
+from api_tareas.authusers.api.tests.helpers import obtain_token_for_user, set_token
 
-
-def create_user_with_credentials(username, password):
-		user = User.objects.create_user(
-			username=username,
-			password=password
-		)
-		return user
-
-
-def obtain_token_for_user(username, password, client):
-		url_auth_token = reverse('authusers:obtain_token')
-		response = client.post(url_auth_token, {
-			'username': username,
-			'password': password
-			}
-		)
-		return response.data['token']
-
-
-def set_token(token, client):
-	client.credentials(HTTP_AUTHORIZATION='Token ' + token)
+from ...models import Task
+from .. import end_points
 
 
 class TaskListCreateAPIViewTest(APITestCase):
 
 	def setUp(self):
-		self.url = reverse('tasks:list_and_create')
+		self.url = end_points.API_V1_TASKS
 
 		create_user_with_credentials(
 			username='engel',
@@ -122,7 +103,7 @@ class TaskMarkAsDoneViewSetTest(APITestCase):
 
 	def test_puedo_marcar_como_terminada_una_tarea(self):
 
-		url = reverse('tasks:mark_as_done', args=[self.task.id])
+		url = reverse(end_points.TASKS_MARK_AS_DONE, args=[self.task.id])
 
 		response = self.client.patch(url)
 
@@ -132,7 +113,7 @@ class TaskMarkAsDoneViewSetTest(APITestCase):
 
 		set_token(token='invalid-token', client=self.client)
 
-		url = reverse('tasks:mark_as_done', args=[self.task.id])
+		url = reverse(end_points.TASKS_MARK_AS_DONE, args=[self.task.id])
 
 		response = self.client.patch(url)
 
@@ -140,7 +121,7 @@ class TaskMarkAsDoneViewSetTest(APITestCase):
 
 	def test_no_puedo_marcar_una_tarea_que_no_existe_como_terminada(self):
 
-		url = reverse('tasks:mark_as_done', args=[3])
+		url = reverse(end_points.TASKS_MARK_AS_DONE, args=[3])
 
 		response = self.client.patch(url)
 
@@ -158,7 +139,7 @@ class TaskMarkAsDoneViewSetTest(APITestCase):
 			owner=user2
 		)
 
-		url = reverse('tasks:mark_as_done', args=[task.id])
+		url = reverse(end_points.TASKS_MARK_AS_DONE, args=[task.id])
 
 		response = self.client.patch(url)
 
@@ -196,8 +177,7 @@ class TaskRetrieveDestroyAPIViewTest(APITestCase):
 			owner=self.otro_usuario
 		)
 
-		self.URL = 'tasks:detail_and_destroy'
-		self.url = reverse(self.URL, args=[self.task.id])
+		self.url = reverse(end_points.TASKS_DETAIL_AND_DESTROY, args=[self.task.id])
 
 	def test_solo_puedo_ver_mis_tareas(self):
 
@@ -207,7 +187,7 @@ class TaskRetrieveDestroyAPIViewTest(APITestCase):
 
 	def test_no_puedo_ver_las_tareas_de_otros_usuarios(self):
 
-		url = reverse(self.URL, args=[self.task_ajena.id])
+		url = reverse(end_points.TASKS_DETAIL_AND_DESTROY, args=[self.task_ajena.id])
 
 		response = self.client.get(url)
 
@@ -229,7 +209,7 @@ class TaskRetrieveDestroyAPIViewTest(APITestCase):
 
 	def test_no_puedo_eliminar_las_tareas_de_otros_usuarios(self):
 
-		url = reverse(self.URL, args=[self.task_ajena.id])
+		url = reverse(end_points.TASKS_DETAIL_AND_DESTROY, args=[self.task_ajena.id])
 
 		response = self.client.delete(url)
 
