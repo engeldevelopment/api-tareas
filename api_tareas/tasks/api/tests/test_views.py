@@ -7,26 +7,48 @@ from rest_framework.test import APITestCase
 from api_tareas.tasks.models import Task
 
 
+def create_user_with_credentials(username, password):
+		user = User.objects.create_user(
+			username=username,
+			password=password
+		)
+		return user
+
+
+def obtain_token_for_user(username, password, client):
+		url_auth_token = reverse('authusers:obtain_token')
+		response = client.post(url_auth_token, {
+			'username': username,
+			'password': password
+			}
+		)
+		return response.data['token']
+
+
+def set_token(token, client):
+	client.credentials(HTTP_AUTHORIZATION='Token ' + token)
+
+
 class TaskListCreateAPIViewTest(APITestCase):
 
 	def setUp(self):
 		self.url = reverse('tasks:list_and_create')
 
-		User.objects.create_user(
+		create_user_with_credentials(
 			username='engel',
 			password='engel.engel'
 		)
 		self.data = {}
-
-		self.client.login(
+		self.token = obtain_token_for_user(
 			username='engel',
-			password='engel.engel'
+			password='engel.engel',
+			client=self.client
 		)
+		set_token(token=self.token, client=self.client)
 
 	def test_puedo_crear_una_tarea(self):
 
 		self.data['name'] = "Nueva tarea"
-
 		response = self.client.post(self.url, self.data)
 
 		self.assertEqual(status.HTTP_201_CREATED, response.status_code)
@@ -55,15 +77,14 @@ class TaskListCreateAPIViewTest(APITestCase):
 
 		self.assertEqual(status.HTTP_201_CREATED, response.status_code)
 
-	def test_debo_estar_logueado_para_poder_crear_una_tarea(self):
-
-		self.client.logout()
+	def test_debo_pasar_un_token_valido_para_poder_crear_una_tarea(self):
 
 		self.data['name'] = "Nueva tarea"
+		set_token(token='invalid-token', client=self.client)
 
 		response = self.client.post(self.url, self.data)
 
-		self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+		self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
 
 	def test_el_usuario_logueado_no_tiene_tareas_creadas(self):
 
@@ -86,15 +107,13 @@ class TaskMarkAsDoneViewSetTest(APITestCase):
 
 	def setUp(self):
 
-		self.user = User.objects.create_user(
+		self.user = create_user_with_credentials('engel', 'engel.engel')
+		self.token = obtain_token_for_user(
 			username='engel',
-			password='engel.engel'
+			password='engel.engel',
+			client=self.client
 		)
-
-		self.client.login(
-			username='engel',
-			password='engel.engel'
-		)
+		set_token(token=self.token, client=self.client)
 
 		self.task = Task.objects.create(
 			name="Nueva tarea",
@@ -109,15 +128,15 @@ class TaskMarkAsDoneViewSetTest(APITestCase):
 
 		self.assertEqual(status.HTTP_200_OK, response.status_code)
 
-	def test_debo_estar_logueado_para_marcar_como_terminada_una_tarea(self):
+	def test_debo_pasar_un_token_valido_para_marcar_como_terminada_una_tarea(self):
 
-		self.client.logout()
+		set_token(token='invalid-token', client=self.client)
 
 		url = reverse('tasks:mark_as_done', args=[self.task.id])
 
 		response = self.client.patch(url)
 
-		self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+		self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
 
 	def test_no_puedo_marcar_una_tarea_que_no_existe_como_terminada(self):
 
@@ -129,7 +148,7 @@ class TaskMarkAsDoneViewSetTest(APITestCase):
 
 	def test_solo_puedo_marcar_mis_tareas_como_terminadas(self):
 
-		user2 = User.objects.create_user(
+		user2 = create_user_with_credentials(
 			username='angel',
 			password='angel.angel'
 		)
@@ -149,20 +168,23 @@ class TaskMarkAsDoneViewSetTest(APITestCase):
 class TaskRetrieveDestroyAPIViewTest(APITestCase):
 
 	def setUp(self):
-		self.user = User.objects.create_user(
+		self.user = create_user_with_credentials(
 			username='engel',
 			password='engel.engel'
 		)
 
-		self.otro_usuario = User.objects.create_user(
+		self.otro_usuario = create_user_with_credentials(
 			username='otro',
 			password='otro.otro'
 		)
 
-		self.client.login(
+		self.token = obtain_token_for_user(
 			username='engel',
-			password='engel.engel'
+			password='engel.engel',
+			client=self.client
 		)
+
+		set_token(token=self.token, client=self.client)
 
 		self.task = Task.objects.create(
 			name="Nueva tarea",
@@ -191,13 +213,13 @@ class TaskRetrieveDestroyAPIViewTest(APITestCase):
 
 		self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
 
-	def test_debo_estar_logueado_para_ver_el_detalle_de_mi_tarea(self):
+	def test_debo_pasar_un_token_valido_para_ver_el_detalle_de_mi_tarea(self):
 
-		self.client.logout()
+		set_token(token='invalid-token', client=self.client)
 
 		response = self.client.get(self.url)
 
-		self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+		self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
 
 	def test_puedo_eliminar_mis_tareas(self):
 
@@ -215,8 +237,8 @@ class TaskRetrieveDestroyAPIViewTest(APITestCase):
 
 	def test_no_puedo_eliminar_mis_tareas_si_no_estoy_logueado(self):
 
-		self.client.logout()
+		set_token(token='invalid-token', client=self.client)
 
 		response = self.client.delete(self.url)
 
-		self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+		self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
