@@ -48,10 +48,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'api_tareas.tasks',
+    'api_tareas.authusers',
 ]
 
 APP_DE_TERCEROS = [
     'rest_framework',
+    'rest_framework.authtoken',    
     'rest_framework_swagger',
     'corsheaders',
 ]
