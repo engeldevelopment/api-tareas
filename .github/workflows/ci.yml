@@ -2,10 +2,10 @@ name: Integración Continua
 
 on:
   push:
-    paths:
+    paths-ignore:
       - '!*.md'
   pull_request:
-    paths:
+    paths-ignore:
       - '!*.md'
 
 jobs:
