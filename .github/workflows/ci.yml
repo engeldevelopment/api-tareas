@@ -2,7 +2,11 @@ name: Integración Continua
 
 on:
   push:
+    paths:
+      - '!*.md'
   pull_request:
+    paths:
+      - '!*.md'
 
 jobs:
   unittest:
