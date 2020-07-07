@@ -24,6 +24,7 @@ def root(*dirs):
 
 # SECURITY WARNING: keep the secret key used in production secret!
 
+
 def get_env_variable(key):
     return os.environ.get(key, "default")
 
@@ -123,7 +124,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 50
+    'PAGE_SIZE': 50,
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
 }
 
 # Internationalization
